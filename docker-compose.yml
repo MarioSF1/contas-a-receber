@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # Serviço do Banco de Dados
+  db:
+    image: postgres:15-alpine
+    container_name: meu-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: meu_banco
+    ports:
+      - "5432:5432" # Expondo porta para você acessar via ferramenta visual se precisar
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Serviço do Backend Java
+  api:
+    build: ./backend
+    container_name: minha-api-java
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      # Configuração para o Java achar o banco dentro do Docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/meu_banco
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: adminpassword
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+volumes:
+  postgres_data:
